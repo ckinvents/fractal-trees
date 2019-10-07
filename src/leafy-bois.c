@@ -40,7 +40,7 @@ void main(int argv, int* argc[])
 {
     // Setup screen first
     window = SDL_CreateWindow(
-        "Leafy Bois",
+        "Trees (Slightly Broken)",
         SDL_WINDOWPOS_UNDEFINED,
         SDL_WINDOWPOS_UNDEFINED,
         WIDTH,
@@ -79,8 +79,9 @@ void main(int argv, int* argc[])
             {
                 for (int i = 0; i < numActiveTree; i++)
                 {
+                    //printf("Updating tree %d...\n", i);
                     Tree_updateTree(&forest[i], &event, dt);
-                    if (i == numActiveTree - 1 && numActiveTree < 255 && forest[i].state & stateMask == complete)
+                    if (i == numActiveTree - 1 && numActiveTree < 255 && (forest[i].state & stateMask) == complete)
                     {
                         numActiveTree++;
                     }
@@ -90,8 +91,6 @@ void main(int argv, int* argc[])
         // Draw loop
         SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0xff);
         SDL_RenderClear(renderer);
-        SDL_SetRenderDrawColor(renderer, 0xff, 0xff, 0xff, 0xff);
-        SDL_RenderDrawLine(renderer, 10, 10, 100, 100);
         for (int i = 0; i < numActiveTree; i++)
         {
             Tree_drawTree(&forest[i], renderer);

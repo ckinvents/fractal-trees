@@ -37,13 +37,15 @@ void Vector_addVector(Vector* vec1, Vector* vec2, Vector* result)
 // Returns angle of vector from horizontal
 double Vector_getAngle(Vector* vec)
 {
-    return atan2(vec->y, vec->x);
+    return atan2((double)vec->y, (double)vec->x);
 }
 
 // Returns length of vector
 double Vector_getLength(Vector* vec)
 {
-    return sqrt(vec->x * vec->x + vec->y + vec->y);
+    double newX = vec->x;
+    double newY = vec->y;
+    return sqrt(newX * newX + newY * newY);
 }
 
 double Vector_getAngleDif(Vector* vec1, Vector* vec2)

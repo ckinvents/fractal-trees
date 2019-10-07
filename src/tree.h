@@ -8,6 +8,9 @@
 // computational/drawing
 // info
 
+#define MAX_BRANCHES 20000
+#define MAX_LEAVES 1024
+
 typedef struct _Branch {
     Vector point1;
     Vector point2;
@@ -20,16 +23,16 @@ typedef struct _Leaf {
 } Leaf;
 
 typedef struct _Tree {
-    Branch branches[255];
-    Leaf leaves[255];
+    Branch branches[MAX_BRANCHES];
+    Leaf leaves[MAX_LEAVES];
     Vector originCoord;
     Vector branch1;
     Vector branch2;
     Vector branch3;
     double duration;
     uint8_t state;
-    uint8_t branchNum;
-    uint8_t leafNum;
+    uint16_t branchNum;
+    uint16_t leafNum;
 } Tree;
 
 enum _TreeStateFlags {
@@ -61,7 +64,7 @@ void Tree_computeTree(Tree* tree);
 void Tree_computeBranches(Tree* tree, Vector originCoord, Vector branch1, double angle2, double length2, double angle3, double length3);
 
 // Pops branch to tree
-void Tree_popBranch(Tree* tree, Vector* origin, Vector* offset);
+void Tree_popBranch(Tree* tree, Vector* origin, Vector* offset, SDL_Color* color);
 
 // Pops leaf to tree
 void Tree_popLeaf(Tree* tree, Vector* point);

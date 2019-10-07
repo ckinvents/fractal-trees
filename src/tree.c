@@ -12,8 +12,8 @@
  * Connor Ennis, 2019
  **/
 
-#define MIN_BRANCH_LENGTH 5
-#define BRANCH_SHRINK_FACTOR 2
+#define MIN_BRANCH_LENGTH 2
+#define BRANCH_SHRINK_FACTOR 1.5
 
 // Initiallizes a tree
 void Tree_initTree(Tree* tree)
@@ -43,19 +43,21 @@ void Tree_fillLeaf(Leaf* leaf, Vector* point, SDL_Color* color)
 void Tree_updateTree(Tree* tree, SDL_Event* event, double dt)
 {
     // See if tree incomplete...
-    if (tree->state & stateMask != complete)
+    //printf("Tree mask state: %x\n", tree->state & stateMask);
+    if ((tree->state & stateMask) != complete)
     {
         int mouseX, mouseY;
         SDL_GetMouseState(&mouseX, &mouseY);
         // If click occurs for current tree
         if (event->type == SDL_MOUSEBUTTONDOWN)
         {
+            //puts("SDL_MOUSEDOWN event");
             // Set to dragging state
             tree->state |= clickMask;
             tree->duration = 0;
         }
         // While dragging...
-        else if (tree->state & clickMask == clickMask)
+        if ((tree->state & clickMask) == clickMask)
         {
             // Based on branch state...
             switch (tree->state & stateMask)
@@ -84,7 +86,6 @@ void Tree_updateTree(Tree* tree, SDL_Event* event, double dt)
                     Vector relOrigin;
                     Vector_addVector(&tree->originCoord, &tree->branch1, &relOrigin);
                     Vector_setCoords(&tree->branch3, mouseX - relOrigin.x, mouseY - relOrigin.y);
-                    Tree_computeTree(tree);
                     break;
                 }
                 default:
@@ -93,6 +94,10 @@ void Tree_updateTree(Tree* tree, SDL_Event* event, double dt)
             // See if button released...
             if (event->type == SDL_MOUSEBUTTONUP)
             {
+                if ((tree->state & stateMask) == threeBranch)
+                {
+                    Tree_computeTree(tree);
+                }
                 tree->state++;
                 tree->state &= ~clickMask;
                 tree->duration = 0;
@@ -132,9 +137,11 @@ void Tree_computeTree(Tree* tree)
 void Tree_computeBranches(Tree* tree, Vector originCoord, Vector branch1, double angle2, double length2, double angle3, double length3)
 {
     // Add branch for origin
-    Tree_popBranch(tree, &originCoord, &branch1);
     Vector newOrigin;
     Vector_addVector(&originCoord, &branch1, &newOrigin);
+    SDL_Color newColor = {0xff, 0x00, 0x00, 0xff};
+    Vector colorVector;
+    Tree_popBranch(tree, &originCoord, &branch1, &newColor);
     // See if branch length less
     // than minimum, create leaf
     // if case
@@ -147,8 +154,9 @@ void Tree_computeBranches(Tree* tree, Vector originCoord, Vector branch1, double
         // Create vectors for 2 & 3
         Vector branch2;
         Vector branch3;
-        Vector_setPolar(&branch2, angle2, length2);
-        Vector_setPolar(&branch3, angle3, length3);
+        double baseAngle = Vector_getAngle(&branch1);
+        Vector_setPolar(&branch2, baseAngle + angle2, length2);
+        Vector_setPolar(&branch3, baseAngle + angle3, length3);
         // Create new branches for 2 and 3
         Tree_computeBranches(tree, newOrigin, branch2, angle2, length2 / BRANCH_SHRINK_FACTOR, angle3, length3 / BRANCH_SHRINK_FACTOR);
         Tree_computeBranches(tree, newOrigin, branch3, angle2, length2 / BRANCH_SHRINK_FACTOR, angle3, length3 / BRANCH_SHRINK_FACTOR);
@@ -156,21 +164,27 @@ void Tree_computeBranches(Tree* tree, Vector originCoord, Vector branch1, double
 }
 
 // Adds branch to tree draw array
-void Tree_popBranch(Tree* tree, Vector* origin, Vector* offset)
+void Tree_popBranch(Tree* tree, Vector* origin, Vector* offset, SDL_Color* color)
 {
     Vector p2;
-    Vector_addVector(origin, offset, &p2);
-    // Placeholder, will add real color manangement
-    SDL_Color branchColor = {0x61, 0x2a, 0x00, 0xff};
-    Tree_fillBranch(&tree->branches[tree->branchNum], origin, &p2, &branchColor);
-    tree->branchNum++;
+    if (tree->branchNum < MAX_BRANCHES)
+    {
+        Vector_addVector(origin, offset, &p2);
+        Tree_fillBranch(&tree->branches[tree->branchNum], origin, &p2, color);
+        tree->branchNum++;
+    }
+    else
+    {
+        printf("FATAL: Max branch count exceded! Halting...\n");
+        exit(EXIT_FAILURE);
+    }
 }
 
 // Adds leaf to tree draw array
 void Tree_popLeaf(Tree* tree, Vector* point)
 {
     // Placeholder, will add real color management
-    SDL_Color leafColor = {0x00, 0xfe, 0x00, 0xff};
+    SDL_Color leafColor = {0x00, 0xff, 0x00, 0xff};
     Tree_fillLeaf(&tree->leaves[tree->leafNum], point, &leafColor);
     tree->leafNum++;
 }
@@ -179,23 +193,23 @@ void Tree_popLeaf(Tree* tree, Vector* point)
 void Tree_drawTree(Tree* tree, SDL_Renderer* renderer)
 {
     // If tree incomplete
-    if (tree->state & stateMask != complete)
+    if ((tree->state & stateMask) != complete)
     {
         SDL_SetRenderDrawColor(renderer, 0xff, 0xff, 0xff, 0xff);
         // If at least one branch
-        if (tree->state & stateMask > 0)
+        if ((tree->state & stateMask) >= 1)
         {
             Vector newOrigin;
             Vector_addVector(&tree->originCoord, &tree->branch1, &newOrigin);
             SDL_RenderDrawLine(renderer, tree->originCoord.x, tree->originCoord.y, newOrigin.x, newOrigin.y);
             // If at least two branches
-            if (tree->state & stateMask > 1)
+            if ((tree->state & stateMask) >= 2)
             {
                 Vector point2;
                 Vector_addVector(&newOrigin, &tree->branch2, &point2);
                 SDL_RenderDrawLine(renderer, newOrigin.x, newOrigin.y, point2.x, point2.y);
                 // If three branches
-                if (tree->state & stateMask > 2)
+                if ((tree->state & stateMask) == 3)
                 {
                     Vector point3;
                     Vector_addVector(&newOrigin, &tree->branch3, &point3);
