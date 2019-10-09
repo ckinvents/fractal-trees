@@ -27,8 +27,8 @@
  *   information
  **/
 
-const int WIDTH = 640;
-const int HEIGHT = 480;
+const int WIDTH = 1020;
+const int HEIGHT = 800;
 
 SDL_Window* window;
 SDL_Renderer* renderer;
@@ -40,7 +40,7 @@ void main(int argv, int* argc[])
 {
     // Setup screen first
     window = SDL_CreateWindow(
-        "Trees (Slightly Broken)",
+        "Trees (Now Actually Pretty Good)",
         SDL_WINDOWPOS_UNDEFINED,
         SDL_WINDOWPOS_UNDEFINED,
         WIDTH,
@@ -69,6 +69,7 @@ void main(int argv, int* argc[])
     while (isRunning)
     {
         startFrame = SDL_GetTicks();
+        // Event handler
         while (SDL_PollEvent(&event))
         {
             if (event.type == SDL_QUIT)
@@ -80,13 +81,20 @@ void main(int argv, int* argc[])
                 for (int i = 0; i < numActiveTree; i++)
                 {
                     //printf("Updating tree %d...\n", i);
-                    Tree_updateTree(&forest[i], &event, dt);
+                    Tree_triggerTree(&forest[i], &event);
+                    //printf("Number of branches: %lu", sizeof(forest[i].branches) / sizeof(Branch));
                     if (i == numActiveTree - 1 && numActiveTree < 255 && (forest[i].state & stateMask) == complete)
                     {
                         numActiveTree++;
                     }
                 }
             }
+        }
+        // Update loop
+        for (int i = 0; i < numActiveTree; i++)
+        {
+            Tree_updateTree(&forest[i], dt);
+            //puts("update");
         }
         // Draw loop
         SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0xff);

@@ -8,8 +8,8 @@
 // computational/drawing
 // info
 
-#define MAX_BRANCHES 20000
-#define MAX_LEAVES 1024
+#define MAX_BRANCHES 20000u
+#define MAX_LEAVES 0//1024u
 
 typedef struct _Branch {
     Vector point1;
@@ -30,6 +30,7 @@ typedef struct _Tree {
     Vector branch2;
     Vector branch3;
     double duration;
+    uint8_t indiColor;
     uint8_t state;
     uint16_t branchNum;
     uint16_t leafNum;
@@ -52,8 +53,11 @@ void Tree_fillBranch(Branch* branch, Vector* p1, Vector* p2, SDL_Color* color);
 // Fills a leaf struct
 void Tree_fillLeaf(Leaf* leaf, Vector* point, SDL_Color* color);
 
-// Updates a tree
-void Tree_updateTree(Tree* tree, SDL_Event* event, double dt);
+// Handles tree events
+void Tree_triggerTree(Tree* tree, SDL_Event* event);
+
+// Updates tree
+void Tree_updateTree(Tree* tree, double dt);
 
 // Computes branches & leaves in tree
 void Tree_computeTree(Tree* tree);
