@@ -22,6 +22,7 @@ void Tree_initTree(Tree* tree)
     tree->state = noBranch;
     tree->branchNum = 0;
     tree->leafNum = 0;
+    tree->indiColor = 0;
 }
 
 // Fills a branch struct
@@ -122,7 +123,7 @@ void Tree_updateTree(Tree* tree, double dt)
     {
         int colorMax = 128 - (int)(127 * cos((M_PI * i) / (tree->branchNum) + tree->duration * 5));// + tree->duration));
         //printf("colorMax: %d\n", colorMax);
-        tree->branches[i].color.g = colorMax;
+        tree->branches[i].color.r = colorMax;
         tree->branches[i].color.b = colorMax;
     }
 }
@@ -150,7 +151,7 @@ void Tree_computeBranches(Tree* tree, Vector originCoord, Vector branch1, double
     Vector_addVector(&originCoord, &branch1, &newOrigin);
     // To see when branches added...
     //int brightFactor = tree->branchNum ? (int)(200 * (MAX_BRANCHES / tree->branchNum)) : 0;
-    SDL_Color newColor = {0xff, 0, 0, 0xff};
+    SDL_Color newColor = {0x00, 0xff, 0, 0xff};
     Vector colorVector;
     Tree_popBranch(tree, &originCoord, &branch1, &newColor);
     // See if branch length less
@@ -211,6 +212,9 @@ void Tree_popLeaf(Tree* tree, Vector* point)
 // Draws tree in given state
 void Tree_drawTree(Tree* tree, SDL_Renderer* renderer)
 {
+    //printf("Tree state: %d\n", tree->state & stateMask);
+    //printf("Tree originCoord: (%d, %d)\n", tree->originCoord.x, tree->originCoord.y);
+    //printf("Tree branch1: (%d, %d)\n", tree->branch1.x, tree->branch1.y);
     // If tree incomplete
     if ((tree->state & stateMask) != complete)
     {

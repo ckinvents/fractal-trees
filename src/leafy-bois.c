@@ -76,6 +76,17 @@ void main(int argv, int* argc[])
             {
                 isRunning = 0;
             }
+            else if (event.type == SDL_KEYDOWN && event.key.keysym.scancode == SDL_SCANCODE_C)
+            {
+                for (int i = 0; i < numActiveTree; i++)
+                {
+                    Tree_initTree(&forest[i]);
+                    Vector_setCoords(&(forest[i].branch1), 0, 0);
+                    Vector_setCoords(&(forest[i].branch2), 0, 0);
+                    Vector_setCoords(&(forest[i].branch3), 0, 0);
+                }
+                numActiveTree = 1;
+            }
             else
             {
                 for (int i = 0; i < numActiveTree; i++)
